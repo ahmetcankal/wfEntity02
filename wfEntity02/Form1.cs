@@ -30,7 +30,6 @@ namespace wfEntity02
             comboBox2.ValueMember = "TedarikciID";
             comboBox2.DataSource = db.Tedarikciler.ToList();
 
-            
         }
 
         private void btnadd_Click(object sender, EventArgs e)
@@ -46,11 +45,54 @@ namespace wfEntity02
             db.SaveChanges();
 
             dataGridView1.DataSource = db.Urunler.ToList();
+        }       
+
+        private void Search_Click(object sender, EventArgs e)
+        {
+            NorthwindEntities db = new NorthwindEntities();
+            if (txturunad.Text != null)
+            {
+                var sonuc = db.Urunler.Where(x => x.UrunAdi.Contains(txturunad.Text)).ToList();
+                dataGridView1.DataSource = sonuc;
+
+            }
+            else
+            {
+                dataGridView1.DataSource = db.Urunler.ToList();
+            }
 
 
+        }
+
+        private void Delete_Click(object sender, EventArgs e)
+        {
+            NorthwindEntities db = new NorthwindEntities();
+            int vurunid = Convert.ToInt32(dataGridView1.CurrentRow.Cells[0].Value);
+            Urunler silinecek = db.Urunler.FirstOrDefault(x => x.UrunID == vurunid);
+
+            db.Urunler.Remove(silinecek);
+            db.SaveChanges();
+            dataGridView1.DataSource = db.Urunler.ToList();
 
 
+        }
 
+        private void btnjoin_Click(object sender, EventArgs e)
+        {
+            NorthwindEntities db = new NorthwindEntities();
+            var sonuc = from k in db.Kategoriler
+                        join u in db.Urunler on k.KategoriID equals u.KategoriID
+                        join t in db.Tedarikciler on u.TedarikciID equals t.TedarikciID
+                        where k.KategoriAdi==comboBox1.Text
+                        select new
+                        {
+                            k.KategoriAdi,
+                            u.UrunID,
+                            u.UrunAdi,
+                            u.BirimFiyati,
+                            t.SirketAdi
+                        };
+            dataGridView1.DataSource = sonuc.ToList();
 
 
         }
